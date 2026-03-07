@@ -6,3 +6,9 @@ st.set_page_config(page_title="MetalKANO", page_icon="🧪")
 st.title("🧪 MetalKANO Predictor")
 st.write(f"✅ PyTorch {torch.__version__} (CUDA: {torch.cuda.is_available()})")
 st.write(f"✅ RDKit {rdkit.__version__}")
+
+try:
+    import torch_scatter
+    st.write(f"✅ torch_scatter loaded")
+except ImportError as e:
+    st.write(f"❌ torch_scatter: {e}")

@@ -4,5 +4,19 @@ streamlit
 --extra-index-url https://download.pytorch.org/whl/cpu
 torch==2.10.0+cpu
 
+# PyTorch Geometric extensions (torch_scatter for message passing)
+-f https://data.pyg.org/whl/torch-2.10.0+cpu.html
+torch_scatter
+
 # Chemistry
 rdkit
+
+# Other deps used by chemprop
+pandas
+numpy
+scikit-learn
+scipy
+networkx
+tqdm
+tensorboardX
+Unidecode
