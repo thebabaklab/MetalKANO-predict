@@ -27,24 +27,98 @@ RESULTS_DIR = "results/streamlit"
 
 MAX_BATCH_ROWS = 100
 
-st.set_page_config(page_title="KANO Predictor", page_icon="🧪", layout="wide")
+st.set_page_config(page_title="MetalKANO Predictor", page_icon="🧪", layout="wide")
 
 st.markdown("""
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
 <style>
+    /* --- Global font --- */
+    html, body, [class*="css"] { font-family: 'Roboto', sans-serif; }
+
+    /* --- Header banner (black gradient, gold accent) --- */
     .header-container {
-        background: linear-gradient(135deg, #0d47a1 0%, #1565c0 100%);
-        padding: 2.5rem; border-radius: 8px; color: white; margin-bottom: 2rem;
+        background: linear-gradient(90deg, rgba(0,0,0,0.85) 0%, #000 50%, rgba(0,0,0,0.85) 100%);
+        padding: 2.5rem 2.5rem 2rem;
+        border-radius: 16px;
+        color: white;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.25);
     }
-    .header-container h1 { margin: 0; font-size: 2.5rem; }
-    .result-card { background: white; border-radius: 8px; padding: 1.5rem; margin: 1rem 0; border-left: 4px solid #0d47a1; }
-    .result-card.active { border-left-color: #2e7d32; }
-    .result-card.inactive { border-left-color: #f57c00; }
-    .metric-value { font-size: 2rem; font-weight: 700; }
-    .metric-label { font-size: 0.9rem; color: #666; text-transform: uppercase; }
+    .header-container h1 {
+        margin: 0; font-size: 2.5rem; font-weight: 900; color: #F1C969;
+    }
+    .header-container p {
+        margin: 0.4rem 0 0; font-size: 1rem; color: rgba(255,255,255,0.7); font-weight: 400;
+    }
+
+    /* --- Result card --- */
+    .result-card {
+        background: #fff; border-radius: 16px; overflow: hidden;
+        margin: 1rem 0;
+        box-shadow: 0 0 0 1px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.12);
+    }
+    .result-card-header {
+        background: linear-gradient(90deg, rgba(0,0,0,0.85) 0%, #000 50%, rgba(0,0,0,0.85) 100%);
+        padding: 0.75rem 1.5rem; color: #F1C969; font-weight: 700; font-size: 0.95rem;
+    }
+    .result-card-body { padding: 1.5rem; }
+    .result-card.active .result-card-header { border-bottom: 3px solid #4CAF50; }
+    .result-card.inactive .result-card-header { border-bottom: 3px solid #FF9800; }
+    .metric-value { font-size: 2.2rem; font-weight: 900; color: #0B1E33; }
+    .metric-label { font-size: 0.8rem; color: #6F6F6F; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 500; }
+
+    /* --- Align button with text input --- */
+    /* Hides the label above the button column to align it with the input */
+    div[data-testid="stVerticalBlock"] div[data-testid="stColumns"] > div:nth-child(2) label {
+        visibility: hidden;
+    }
+    div[data-testid="stVerticalBlock"] div[data-testid="stColumns"] > div:nth-child(2) .stButton button {
+        margin-top: 0;
+    }
+
+    /* --- Streamlit button overrides (gold on black) --- */
+    .stButton > button {
+        background: linear-gradient(90deg, rgba(0,0,0,0.85) 0%, #000 50%, rgba(0,0,0,0.85) 100%);
+        color: #F1C969; border: 1px solid rgba(255,255,255,0.15);
+        border-radius: 8px; font-weight: 700; font-family: 'Roboto', sans-serif;
+        transition: all 0.2s;
+    }
+    .stButton > button:hover {
+        background: #111; color: #FFD700; border-color: #F1C969;
+    }
+
+    /* --- Download button --- */
+    .stDownloadButton > button {
+        background: #F1C969; color: #000; border: none; border-radius: 8px; font-weight: 700;
+    }
+    .stDownloadButton > button:hover { background: #FFD700; }
+
+    /* --- Tab styling --- */
+    .stTabs [data-baseweb="tab-list"] button {
+        font-family: 'Roboto', sans-serif; font-weight: 500; color: #0B1E33;
+    }
+    .stTabs [data-baseweb="tab-list"] button[aria-selected="true"] {
+        border-bottom-color: #F1C969; color: #000; font-weight: 700;
+    }
+
+    /* --- Sidebar --- */
+    section[data-testid="stSidebar"] {
+        background: #0B1E33;
+    }
+    section[data-testid="stSidebar"] * {
+        color: #fff !important;
+    }
+    section[data-testid="stSidebar"] .stSelectbox label { color: rgba(255,255,255,0.7) !important; }
+
+    /* --- Footer --- */
+    .footer-text {
+        text-align: center; color: #6F6F6F; font-size: 0.85rem; padding: 0.5rem 0;
+    }
+    .footer-text a { color: #F1C969; text-decoration: none; }
 </style>
 """, unsafe_allow_html=True)
 
-st.markdown('<div class="header-container"><h1>🧪 KANO Predictor</h1><p>Molecular activity prediction</p></div>', unsafe_allow_html=True)
+st.markdown('<div class="header-container"><h1>MetalKANO</h1><p>Metal-based anticancer compound activity prediction</p></div>', unsafe_allow_html=True)
 
 # ============================================================================
 # SIDEBAR
@@ -133,12 +207,13 @@ tab1, tab2 = st.tabs(["Single SMILES", "Batch Upload"])
 
 with tab1:
     st.header("Single Molecule Prediction")
-    col1, col2 = st.columns([3, 1])
-    
+    col1, col2 = st.columns([4, 1])
+
     with col1:
         smiles_input = st.text_input("Enter SMILES", placeholder="CC(=O)Oc1ccccc1C(=O)O")
     with col2:
-        predict_btn = st.button("🔍 Predict", use_container_width=True)
+        st.markdown("<br>", unsafe_allow_html=True)
+        predict_btn = st.button("Predict", use_container_width=True)
     
     if predict_btn and smiles_input:
         with st.spinner("Processing..."):
@@ -149,19 +224,25 @@ with tab1:
                     pred_value = float(pred[0][0])
                     is_active = pred_value > 0.5
                     
+                    status_label = "LIKELY ACTIVE" if is_active else "LIKELY INACTIVE"
+                    status_color = "#4CAF50" if is_active else "#FF9800"
+                    card_class = "active" if is_active else "inactive"
                     st.markdown(f"""
-                    <div class="result-card {'active' if is_active else 'inactive'}">
-                        <div class="metric-label">SMILES</div>
-                        <div style="font-family: monospace; margin-bottom: 1.5rem;">{smiles_input}</div>
-                        <div class="metric-label">Activity Score</div>
-                        <div class="metric-value">{pred_value:.2%}</div>
-                        <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #eee;">
-                            <div style="font-size: 1.2rem; font-weight: 600;">{"✅ LIKELY ACTIVE" if is_active else "❌ LIKELY INACTIVE"}</div>
-                            <div style="font-size: 0.9rem; color: #666;">Probability: {pred_value:.1%}</div>
+                    <div class="result-card {card_class}">
+                        <div class="result-card-header">Prediction Result</div>
+                        <div class="result-card-body">
+                            <div class="metric-label">SMILES</div>
+                            <div style="font-family: 'Roboto Mono', monospace; margin-bottom: 1.5rem; color: #0B1E33; font-size: 0.95rem;">{smiles_input}</div>
+                            <div class="metric-label">Activity Score</div>
+                            <div class="metric-value">{pred_value:.2%}</div>
+                            <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #eee;">
+                                <span style="display: inline-block; background: {status_color}; color: #fff; padding: 0.35rem 1rem;
+                                       border-radius: 6px; font-size: 0.95rem; font-weight: 700;">{status_label}</span>
+                                <span style="margin-left: 0.75rem; font-size: 0.9rem; color: #6F6F6F;">Probability: {pred_value:.1%}</span>
+                            </div>
                         </div>
                     </div>
                     """, unsafe_allow_html=True)
-                    st.success("✓ Complete")
             except Exception as e:
                 st.error(f"❌ {str(e)}")
                 import traceback
@@ -185,7 +266,7 @@ with tab2:
 
         st.info(f"📁 {len(df_input)} molecules")
 
-        if st.button("🔍 Predict All", use_container_width=True, key="batch"):
+        if st.button("Predict All", use_container_width=True, key="batch"):
             if "smiles" not in df_input.columns:
                 st.error("❌ CSV must have 'smiles' column")
             else:
@@ -222,4 +303,4 @@ with tab2:
                             st.code(traceback.format_exc())
 
 st.divider()
-st.markdown("<div style='text-align: center; color: #666;'><p>KANO: Knowledge-Augmented Neural Network Optimizer</p></div>", unsafe_allow_html=True)
+st.markdown('<div class="footer-text">MetalKANO &mdash; Knowledge-Augmented Neural Network for metal-based anticancer compounds &middot; <a href="https://mb-finder.org" target="_blank">MB-Finder</a></div>', unsafe_allow_html=True)
