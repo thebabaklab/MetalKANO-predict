@@ -35,30 +35,29 @@ st.markdown("""
     /* --- Global font & dark background (matches MB-Finder #797979 base + black overlay) --- */
     html, body, [class*="css"] { font-family: 'Roboto', sans-serif; }
 
-    /* Main app background - dark like MB-Finder */
+    /* Main app background - Gunmetal */
     .stApp, .stApp > header {
-        background: #797979 !important;
+        background: #2A3439 !important;
     }
     .stApp {
-        background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), #797979 !important;
+        background: #2A3439 !important;
     }
 
-    /* --- All main-area text: gold for headings, white for body --- */
-    .stApp h1, .stApp h2, .stApp h3 { color: #F1C969 !important; }
+    /* --- All main-area text: amber gold for headings, white for body --- */
+    .stApp h1, .stApp h2, .stApp h3,
+    .stApp h1 span, .stApp h2 span, .stApp h3 span,
+    .stApp h1 div, .stApp h2 div, .stApp h3 div { color: #EABF14 !important; }
     .stApp p, .stApp span, .stApp label, .stApp div,
     .stApp .stMarkdown, .stApp .stText { color: #ffffff !important; }
 
-    /* --- Header banner (black gradient, gold accent - MB-Finder .btn-gradient-radial-black) --- */
+    /* --- Header (no container, sits on main background) --- */
     .header-container {
-        background: linear-gradient(90deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,1) 50%, rgba(0,0,0,0.8) 100%);
-        padding: 2.5rem 2.5rem 2rem;
-        border-radius: 16px;
-        color: white;
-        margin-bottom: 2rem;
-        box-shadow: 0px 4px 4px 0px rgba(0,0,0,0.25);
+        background: transparent;
+        padding: 2.5rem 0 1.5rem;
+        margin-bottom: 1.5rem;
     }
     .header-container h1 {
-        margin: 0; font-size: 2.5rem; font-weight: 900; color: #F1C969 !important;
+        margin: 0; font-size: 2.5rem; font-weight: 900; color: #EABF14 !important;
     }
     .header-container p {
         margin: 0.4rem 0 0; font-size: 1rem; color: rgba(255,255,255,0.7) !important; font-weight: 400;
@@ -89,20 +88,20 @@ st.markdown("""
         margin-top: 0;
     }
 
-    /* --- Predict button: MB-Finder "draw" style (dark-gray gradient, white text) --- */
+    /* --- Predict button: Copper with white text --- */
     .stButton > button {
-        background: linear-gradient(76deg, rgba(185,185,185,1) 0%, rgba(255,255,255,1) 50%, rgba(185,185,185,1) 100%) !important;
-        color: #000 !important; border: none;
+        background: #B87333 !important;
+        color: #ffffff !important; border: none;
         border-radius: 8px; font-weight: 700; font-family: 'Roboto', sans-serif;
         box-shadow: 0px 4px 4px 0px rgba(0,0,0,0.25);
         transition: all 0.2s;
     }
     .stButton > button:hover {
-        background: linear-gradient(76deg, rgba(210,210,210,1) 0%, rgba(255,255,255,1) 50%, rgba(210,210,210,1) 100%) !important;
-        color: #000 !important;
+        background: #a0632b !important;
+        color: #ffffff !important;
     }
     .stButton > button p, .stButton > button span {
-        color: #000 !important;
+        color: #ffffff !important;
     }
 
     /* --- Download button (gold accent) --- */
@@ -122,26 +121,52 @@ st.markdown("""
         color: rgba(255,255,255,0.8) !important;
         background: transparent !important;
     }
-    .stTabs [data-baseweb="tab-list"] button[aria-selected="true"] {
-        color: #F1C969 !important; font-weight: 700;
-        border-bottom-color: #F1C969 !important;
+    .stTabs [data-baseweb="tab-list"] button[aria-selected="true"],
+    .stTabs [data-baseweb="tab-list"] button[aria-selected="true"] * {
+        color: #EABF14 !important; font-weight: 700;
+        border-bottom-color: #EABF14 !important;
     }
-    .stTabs [data-baseweb="tab-list"] button:hover {
-        color: #F1C969 !important;
+    .stTabs [data-baseweb="tab-list"] button[aria-selected="false"],
+    .stTabs [data-baseweb="tab-list"] button[aria-selected="false"] * {
+        color: #ffffff !important;
+    }
+    .stTabs [data-baseweb="tab-list"] button:hover,
+    .stTabs [data-baseweb="tab-list"] button:hover * {
+        color: #EABF14 !important;
     }
     /* Tab panel background */
     .stTabs [data-baseweb="tab-panel"] {
         background: transparent !important;
     }
 
-    /* --- Text input field (dark with white text) --- */
+    /* --- Text input field (Platinum Silver, pill shape, black text) --- */
     .stTextInput input {
-        background: rgba(0,0,0,0.4) !important;
-        color: #ffffff !important;
-        border: 1px solid rgba(255,255,255,0.3) !important;
-        border-radius: 8px;
+        background: #C0C0C0 !important;
+        color: #000000 !important;
+        border: none !important;
+        border-radius: 999px;
     }
-    .stTextInput input::placeholder { color: rgba(255,255,255,0.4) !important; }
+    .stTextInput input::placeholder { color: rgba(0,0,0,0.4) !important; }
+
+    /* --- Selectbox / dropdown (Platinum Silver, pill shape, black text) --- */
+    .stSelectbox [data-baseweb="select"],
+    .stSelectbox [data-baseweb="select"] > div,
+    .stSelectbox [data-baseweb="select"] > div > div {
+        background: #C0C0C0 !important;
+        background-color: #C0C0C0 !important;
+        border-radius: 999px !important;
+        border: none !important;
+    }
+    .stSelectbox [data-baseweb="select"] * {
+        color: #000000 !important;
+    }
+    /* Dropdown menu items */
+    .stSelectbox [data-baseweb="popover"],
+    .stSelectbox [data-baseweb="popover"] ul,
+    .stSelectbox [data-baseweb="popover"] li {
+        background-color: #C0C0C0 !important;
+        color: #000000 !important;
+    }
 
     /* --- File uploader --- */
     .stFileUploader { color: #ffffff !important; }
@@ -160,18 +185,6 @@ st.markdown("""
     }
     [data-testid="stMetric"] label { color: rgba(255,255,255,0.7) !important; }
     [data-testid="stMetric"] [data-testid="stMetricValue"] { color: #F1C969 !important; }
-
-    /* --- Sidebar (dark like MB-Finder) --- */
-    section[data-testid="stSidebar"] {
-        background: linear-gradient(76deg, rgba(0,0,0,1) 0%, rgba(66,64,64,1) 11%, rgba(0,0,0,1) 31%, rgba(0,0,0,1) 78%, rgba(66,64,64,1) 89%, rgba(0,0,0,1) 100%);
-    }
-    section[data-testid="stSidebar"] * {
-        color: #fff !important;
-    }
-    section[data-testid="stSidebar"] .stSelectbox label { color: rgba(255,255,255,0.7) !important; }
-    section[data-testid="stSidebar"] .stSelectbox [data-baseweb="select"] {
-        background: rgba(255,255,255,0.1);
-    }
 
     /* --- Alert boxes on dark bg --- */
     .stAlert { border-radius: 8px; }
@@ -193,13 +206,11 @@ st.markdown("""
 st.markdown('<div class="header-container"><h1>MetalKANO</h1><p>Metal-based anticancer compound activity prediction</p></div>', unsafe_allow_html=True)
 
 # ============================================================================
-# SIDEBAR
+# CELL LINE SELECTOR (inline, below header)
 # ============================================================================
 
-st.sidebar.header("⚙️ Configuration")
-selected_cell_line = st.sidebar.selectbox("Cell Line", list(CELL_LINE_MODELS.keys()))
+selected_cell_line = st.selectbox("Cell Line", list(CELL_LINE_MODELS.keys()))
 checkpoint_path = CELL_LINE_MODELS[selected_cell_line]
-st.sidebar.caption(f"Model: `{checkpoint_path}`")
 
 # ============================================================================
 # PREDICTION WRAPPER - Calls predict.py directly
