@@ -32,43 +32,56 @@ st.set_page_config(page_title="MetalKANO Predictor", page_icon="🧪", layout="w
 st.markdown("""
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
 <style>
-    /* --- Global font --- */
+    /* --- Global font & dark background (matches MB-Finder #797979 base + black overlay) --- */
     html, body, [class*="css"] { font-family: 'Roboto', sans-serif; }
 
-    /* --- Header banner (black gradient, gold accent) --- */
+    /* Main app background - dark like MB-Finder */
+    .stApp, .stApp > header {
+        background: #797979 !important;
+    }
+    .stApp {
+        background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), #797979 !important;
+    }
+
+    /* --- All main-area text: gold for headings, white for body --- */
+    .stApp h1, .stApp h2, .stApp h3 { color: #F1C969 !important; }
+    .stApp p, .stApp span, .stApp label, .stApp div,
+    .stApp .stMarkdown, .stApp .stText { color: #ffffff !important; }
+
+    /* --- Header banner (black gradient, gold accent - MB-Finder .btn-gradient-radial-black) --- */
     .header-container {
-        background: linear-gradient(90deg, rgba(0,0,0,0.85) 0%, #000 50%, rgba(0,0,0,0.85) 100%);
+        background: linear-gradient(90deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,1) 50%, rgba(0,0,0,0.8) 100%);
         padding: 2.5rem 2.5rem 2rem;
         border-radius: 16px;
         color: white;
         margin-bottom: 2rem;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+        box-shadow: 0px 4px 4px 0px rgba(0,0,0,0.25);
     }
     .header-container h1 {
-        margin: 0; font-size: 2.5rem; font-weight: 900; color: #F1C969;
+        margin: 0; font-size: 2.5rem; font-weight: 900; color: #F1C969 !important;
     }
     .header-container p {
-        margin: 0.4rem 0 0; font-size: 1rem; color: rgba(255,255,255,0.7); font-weight: 400;
+        margin: 0.4rem 0 0; font-size: 1rem; color: rgba(255,255,255,0.7) !important; font-weight: 400;
     }
 
-    /* --- Result card --- */
+    /* --- Result card (dark card on dark bg) --- */
     .result-card {
-        background: #fff; border-radius: 16px; overflow: hidden;
+        background: rgba(0,0,0,0.5); border-radius: 16px; overflow: hidden;
         margin: 1rem 0;
-        box-shadow: 0 0 0 1px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.12);
+        box-shadow: 0px 4px 4px 0px rgba(0,0,0,0.25);
     }
     .result-card-header {
-        background: linear-gradient(90deg, rgba(0,0,0,0.85) 0%, #000 50%, rgba(0,0,0,0.85) 100%);
-        padding: 0.75rem 1.5rem; color: #F1C969; font-weight: 700; font-size: 0.95rem;
+        background: linear-gradient(76deg, rgba(0,0,0,1) 0%, rgba(66,64,64,1) 11%, rgba(0,0,0,1) 31%, rgba(0,0,0,1) 78%, rgba(66,64,64,1) 89%, rgba(0,0,0,1) 100%);
+        padding: 0.75rem 1.5rem; color: #F1C969 !important; font-weight: 700; font-size: 0.95rem;
     }
     .result-card-body { padding: 1.5rem; }
+    .result-card-body * { color: #ffffff !important; }
     .result-card.active .result-card-header { border-bottom: 3px solid #4CAF50; }
     .result-card.inactive .result-card-header { border-bottom: 3px solid #FF9800; }
-    .metric-value { font-size: 2.2rem; font-weight: 900; color: #0B1E33; }
-    .metric-label { font-size: 0.8rem; color: #6F6F6F; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 500; }
+    .metric-value { font-size: 2.2rem; font-weight: 900; color: #F1C969 !important; }
+    .metric-label { font-size: 0.8rem; color: rgba(255,255,255,0.7) !important; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 500; }
 
     /* --- Align button with text input --- */
-    /* Hides the label above the button column to align it with the input */
     div[data-testid="stVerticalBlock"] div[data-testid="stColumns"] > div:nth-child(2) label {
         visibility: hidden;
     }
@@ -76,45 +89,104 @@ st.markdown("""
         margin-top: 0;
     }
 
-    /* --- Streamlit button overrides (gold on black) --- */
+    /* --- Predict button: MB-Finder "draw" style (dark-gray gradient, white text) --- */
     .stButton > button {
-        background: linear-gradient(90deg, rgba(0,0,0,0.85) 0%, #000 50%, rgba(0,0,0,0.85) 100%);
-        color: #F1C969; border: 1px solid rgba(255,255,255,0.15);
+        background: linear-gradient(76deg, rgba(185,185,185,1) 0%, rgba(255,255,255,1) 50%, rgba(185,185,185,1) 100%) !important;
+        color: #000 !important; border: none;
         border-radius: 8px; font-weight: 700; font-family: 'Roboto', sans-serif;
+        box-shadow: 0px 4px 4px 0px rgba(0,0,0,0.25);
         transition: all 0.2s;
     }
     .stButton > button:hover {
-        background: #111; color: #FFD700; border-color: #F1C969;
+        background: linear-gradient(76deg, rgba(210,210,210,1) 0%, rgba(255,255,255,1) 50%, rgba(210,210,210,1) 100%) !important;
+        color: #000 !important;
+    }
+    .stButton > button p, .stButton > button span {
+        color: #000 !important;
     }
 
-    /* --- Download button --- */
+    /* --- Download button (gold accent) --- */
     .stDownloadButton > button {
-        background: #F1C969; color: #000; border: none; border-radius: 8px; font-weight: 700;
+        background: #F1C969 !important; color: #000 !important; border: none; border-radius: 8px; font-weight: 700;
+        box-shadow: 0px 4px 4px 0px rgba(0,0,0,0.25);
     }
-    .stDownloadButton > button:hover { background: #FFD700; }
+    .stDownloadButton > button:hover { background: #ffd46b !important; }
+    .stDownloadButton > button p, .stDownloadButton > button span { color: #000 !important; }
 
-    /* --- Tab styling --- */
+    /* --- Tab styling: active=gold, inactive=white (MB-Finder style) --- */
+    .stTabs [data-baseweb="tab-list"] {
+        background: transparent; border-bottom: 1px solid rgba(255,255,255,0.2);
+    }
     .stTabs [data-baseweb="tab-list"] button {
-        font-family: 'Roboto', sans-serif; font-weight: 500; color: #0B1E33;
+        font-family: 'Roboto', sans-serif; font-weight: 500;
+        color: rgba(255,255,255,0.8) !important;
+        background: transparent !important;
     }
     .stTabs [data-baseweb="tab-list"] button[aria-selected="true"] {
-        border-bottom-color: #F1C969; color: #000; font-weight: 700;
+        color: #F1C969 !important; font-weight: 700;
+        border-bottom-color: #F1C969 !important;
+    }
+    .stTabs [data-baseweb="tab-list"] button:hover {
+        color: #F1C969 !important;
+    }
+    /* Tab panel background */
+    .stTabs [data-baseweb="tab-panel"] {
+        background: transparent !important;
     }
 
-    /* --- Sidebar --- */
+    /* --- Text input field (dark with white text) --- */
+    .stTextInput input {
+        background: rgba(0,0,0,0.4) !important;
+        color: #ffffff !important;
+        border: 1px solid rgba(255,255,255,0.3) !important;
+        border-radius: 8px;
+    }
+    .stTextInput input::placeholder { color: rgba(255,255,255,0.4) !important; }
+
+    /* --- File uploader --- */
+    .stFileUploader { color: #ffffff !important; }
+    .stFileUploader label { color: #ffffff !important; }
+    section[data-testid="stFileUploadDropzone"] {
+        background: rgba(0,0,0,0.3) !important;
+        border-color: rgba(255,255,255,0.3) !important;
+    }
+
+    /* --- Dataframe / table --- */
+    .stDataFrame { border-radius: 8px; overflow: hidden; }
+
+    /* --- Metric cards (dark bg) --- */
+    [data-testid="stMetric"] {
+        background: rgba(0,0,0,0.4); border-radius: 8px; padding: 0.75rem;
+    }
+    [data-testid="stMetric"] label { color: rgba(255,255,255,0.7) !important; }
+    [data-testid="stMetric"] [data-testid="stMetricValue"] { color: #F1C969 !important; }
+
+    /* --- Sidebar (dark like MB-Finder) --- */
     section[data-testid="stSidebar"] {
-        background: #0B1E33;
+        background: linear-gradient(76deg, rgba(0,0,0,1) 0%, rgba(66,64,64,1) 11%, rgba(0,0,0,1) 31%, rgba(0,0,0,1) 78%, rgba(66,64,64,1) 89%, rgba(0,0,0,1) 100%);
     }
     section[data-testid="stSidebar"] * {
         color: #fff !important;
     }
     section[data-testid="stSidebar"] .stSelectbox label { color: rgba(255,255,255,0.7) !important; }
+    section[data-testid="stSidebar"] .stSelectbox [data-baseweb="select"] {
+        background: rgba(255,255,255,0.1);
+    }
+
+    /* --- Alert boxes on dark bg --- */
+    .stAlert { border-radius: 8px; }
+
+    /* --- Divider --- */
+    hr { border-color: rgba(255,255,255,0.15) !important; }
 
     /* --- Footer --- */
     .footer-text {
-        text-align: center; color: #6F6F6F; font-size: 0.85rem; padding: 0.5rem 0;
+        text-align: center; color: rgba(255,255,255,0.5) !important; font-size: 0.85rem; padding: 0.5rem 0;
     }
-    .footer-text a { color: #F1C969; text-decoration: none; }
+    .footer-text a { color: #F1C969 !important; text-decoration: none; }
+
+    /* --- Spinner --- */
+    .stSpinner > div { color: #F1C969 !important; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -232,13 +304,13 @@ with tab1:
                         <div class="result-card-header">Prediction Result</div>
                         <div class="result-card-body">
                             <div class="metric-label">SMILES</div>
-                            <div style="font-family: 'Roboto Mono', monospace; margin-bottom: 1.5rem; color: #0B1E33; font-size: 0.95rem;">{smiles_input}</div>
+                            <div style="font-family: 'Roboto Mono', monospace; margin-bottom: 1.5rem; color: #ffffff; font-size: 0.95rem;">{smiles_input}</div>
                             <div class="metric-label">Activity Score</div>
                             <div class="metric-value">{pred_value:.2%}</div>
-                            <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #eee;">
+                            <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.15);">
                                 <span style="display: inline-block; background: {status_color}; color: #fff; padding: 0.35rem 1rem;
                                        border-radius: 6px; font-size: 0.95rem; font-weight: 700;">{status_label}</span>
-                                <span style="margin-left: 0.75rem; font-size: 0.9rem; color: #6F6F6F;">Probability: {pred_value:.1%}</span>
+                                <span style="margin-left: 0.75rem; font-size: 0.9rem; color: rgba(255,255,255,0.6);">Probability: {pred_value:.1%}</span>
                             </div>
                         </div>
                     </div>
