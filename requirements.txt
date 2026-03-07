@@ -3,3 +3,6 @@ streamlit
 # PyTorch CPU-only (latest stable with Python 3.14 support)
 --extra-index-url https://download.pytorch.org/whl/cpu
 torch==2.10.0+cpu
+
+# Chemistry
+rdkit
