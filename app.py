@@ -5,6 +5,7 @@ Calls the working predict.py script directly
 import streamlit as st
 import pandas as pd
 import subprocess
+import sys
 import tempfile
 import os
 import warnings
@@ -75,7 +76,7 @@ def predict_smiles(smiles_list, checkpoint_path):
         # Run predict.py as subprocess in the same environment
         result = subprocess.run(
             [
-                "python", "predict.py",
+                sys.executable, "predict.py",
                 "--exp_name", RESULTS_DIR,
                 "--exp_id", "pred",
                 "--checkpoint_path", checkpoint_path,
