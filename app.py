@@ -35,9 +35,10 @@ st.markdown("""
     /* --- Global font & dark background (matches MB-Finder #797979 base + black overlay) --- */
     html, body, [class*="css"] { font-family: 'Roboto', sans-serif; }
 
-    /* Main app background - Gunmetal */
-    .stApp, .stApp > header {
+    /* Main app background - Gunmetal (including top header bar) */
+    .stApp, .stApp > header, header[data-testid="stHeader"] {
         background: #2A3439 !important;
+        background-color: #2A3439 !important;
     }
     .stApp {
         background: #2A3439 !important;
@@ -46,7 +47,7 @@ st.markdown("""
     /* --- All main-area text: amber gold for headings, white for body --- */
     .stApp h1, .stApp h2, .stApp h3,
     .stApp h1 span, .stApp h2 span, .stApp h3 span,
-    .stApp h1 div, .stApp h2 div, .stApp h3 div { color: #EABF14 !important; }
+    .stApp h1 div, .stApp h2 div, .stApp h3 div { color: #EABF14 !important; font-family: 'Avenir', 'Avenir Next', sans-serif !important; }
     .stApp p, .stApp span, .stApp label, .stApp div,
     .stApp .stMarkdown, .stApp .stText { color: #ffffff !important; }
 
@@ -57,7 +58,7 @@ st.markdown("""
         margin-bottom: 1.5rem;
     }
     .header-container h1 {
-        margin: 0; font-size: 2.5rem; font-weight: 900; color: #EABF14 !important;
+        margin: 0; font-size: 3.5rem; font-weight: 900; color: #EABF14 !important; font-family: 'Avenir', 'Avenir Next', sans-serif;
     }
     .header-container p {
         margin: 0.4rem 0 0; font-size: 1rem; color: rgba(255,255,255,0.7) !important; font-weight: 400;
@@ -140,11 +141,20 @@ st.markdown("""
     }
 
     /* --- Text input field (Platinum Silver, pill shape, black text) --- */
-    .stTextInput input {
+    .stTextInput input,
+    .stTextInput > div,
+    .stTextInput > div > div {
         background: #C0C0C0 !important;
+        background-color: #C0C0C0 !important;
         color: #000000 !important;
         border: none !important;
-        border-radius: 999px;
+        border-radius: 999px !important;
+    }
+    .stTextInput input:focus,
+    .stTextInput > div:focus-within {
+        border: 2px solid #B87333 !important;
+        outline: none !important;
+        box-shadow: none !important;
     }
     .stTextInput input::placeholder { color: rgba(0,0,0,0.4) !important; }
 
@@ -160,6 +170,12 @@ st.markdown("""
     .stSelectbox [data-baseweb="select"] * {
         color: #000000 !important;
     }
+    .stSelectbox [data-baseweb="select"]:focus-within,
+    .stSelectbox [data-baseweb="select"]:focus-within > div {
+        border: 2px solid #B87333 !important;
+        outline: none !important;
+        box-shadow: none !important;
+    }
     /* Dropdown menu items */
     .stSelectbox [data-baseweb="popover"],
     .stSelectbox [data-baseweb="popover"] ul,
@@ -168,12 +184,39 @@ st.markdown("""
         color: #000000 !important;
     }
 
-    /* --- File uploader --- */
-    .stFileUploader { color: #ffffff !important; }
+    /* --- File uploader: container = Platinum Silver, black text --- */
+    .stFileUploader { color: #000000 !important; }
     .stFileUploader label { color: #ffffff !important; }
-    section[data-testid="stFileUploadDropzone"] {
-        background: rgba(0,0,0,0.3) !important;
-        border-color: rgba(255,255,255,0.3) !important;
+    [data-testid="stFileUploadDropzone"],
+    [data-testid="stFileUploader"] section,
+    .stFileUploader section,
+    .uploadedFile {
+        background: #C0C0C0 !important;
+        background-color: #C0C0C0 !important;
+        border: none !important;
+        border-radius: 12px !important;
+    }
+    [data-testid="stFileUploadDropzone"] *,
+    [data-testid="stFileUploader"] section *,
+    .stFileUploader section * {
+        color: #000000 !important;
+    }
+    /* Browse files button = Copper, white text */
+    [data-testid="stFileUploadDropzone"] button,
+    [data-testid="stFileUploader"] section button,
+    .stFileUploader section button,
+    [data-testid="baseButton-secondary"] {
+        background: #B87333 !important;
+        background-color: #B87333 !important;
+        color: #ffffff !important;
+        border: none !important;
+        border-radius: 8px !important;
+    }
+    [data-testid="stFileUploadDropzone"] button *,
+    [data-testid="stFileUploader"] section button *,
+    .stFileUploader section button *,
+    [data-testid="baseButton-secondary"] * {
+        color: #ffffff !important;
     }
 
     /* --- Dataframe / table --- */
@@ -289,7 +332,7 @@ def predict_smiles(smiles_list, checkpoint_path):
 tab1, tab2 = st.tabs(["Single SMILES", "Batch Upload"])
 
 with tab1:
-    st.header("Single Molecule Prediction")
+    st.header("SINGLE MOLECULE PREDICTION")
     col1, col2 = st.columns([4, 1])
 
     with col1:
@@ -333,7 +376,7 @@ with tab1:
                     st.code(traceback.format_exc())
 
 with tab2:
-    st.header("Batch Prediction")
+    st.header("BATCH PREDICTION")
     st.markdown("Upload CSV with 'smiles' column")
     
     uploaded_file = st.file_uploader("Upload CSV", type=["csv"])
