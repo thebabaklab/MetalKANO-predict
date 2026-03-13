@@ -9,6 +9,7 @@ import sys
 import tempfile
 import os
 import warnings
+import sanitization
 
 warnings.filterwarnings("ignore")
 
@@ -64,22 +65,37 @@ st.markdown("""
         margin: 0.4rem 0 0; font-size: 1rem; color: rgba(255,255,255,0.7) !important; font-weight: 400;
     }
 
-    /* --- Result card (dark card on dark bg) --- */
+    /* --- Result card (white bg, black text) --- */
     .result-card {
-        background: rgba(0,0,0,0.5); border-radius: 16px; overflow: hidden;
+        background: #ffffff; border-radius: 16px; overflow: hidden;
         margin: 1rem 0;
         box-shadow: 0px 4px 4px 0px rgba(0,0,0,0.25);
     }
     .result-card-header {
-        background: linear-gradient(76deg, rgba(0,0,0,1) 0%, rgba(66,64,64,1) 11%, rgba(0,0,0,1) 31%, rgba(0,0,0,1) 78%, rgba(66,64,64,1) 89%, rgba(0,0,0,1) 100%);
-        padding: 0.75rem 1.5rem; color: #F1C969 !important; font-weight: 700; font-size: 0.95rem;
+        background: #B87333;
+        padding: 0.75rem 1.5rem; color: #ffffff !important; font-weight: 700; font-size: 0.95rem;
     }
     .result-card-body { padding: 1.5rem; }
-    .result-card-body * { color: #ffffff !important; }
+    .stApp .result-card-body,
+    .stApp .result-card-body * { color: #000000 !important; }
     .result-card.active .result-card-header { border-bottom: 3px solid #4CAF50; }
     .result-card.inactive .result-card-header { border-bottom: 3px solid #FF9800; }
-    .metric-value { font-size: 2.2rem; font-weight: 900; color: #F1C969 !important; }
-    .metric-label { font-size: 0.8rem; color: rgba(255,255,255,0.7) !important; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 500; }
+    .metric-value { font-size: 2.2rem; font-weight: 900; color: #2A3439 !important; }
+    .metric-label { font-size: 0.8rem; color: rgba(0,0,0,0.6) !important; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 500; }
+
+    /* --- Dataframe tables (Titanium Gray) --- */
+    .stDataFrame, .stDataFrame > div,
+    [data-testid="stDataFrame"], [data-testid="stDataFrame"] > div,
+    .stDataFrame iframe, [data-testid="stDataFrame"] iframe {
+        background: #878681 !important;
+        background-color: #878681 !important;
+        border-radius: 12px !important;
+        padding: 4px;
+    }
+    /* Metric cards in batch results */
+    [data-testid="stMetric"] {
+        background: #878681 !important; border-radius: 8px; padding: 0.75rem;
+    }
 
     /* --- Align button with text input --- */
     div[data-testid="stVerticalBlock"] div[data-testid="stColumns"] > div:nth-child(2) label {
@@ -222,12 +238,12 @@ st.markdown("""
     /* --- Dataframe / table --- */
     .stDataFrame { border-radius: 8px; overflow: hidden; }
 
-    /* --- Metric cards (dark bg) --- */
+    /* --- Metric cards (Titanium Gray) --- */
     [data-testid="stMetric"] {
-        background: rgba(0,0,0,0.4); border-radius: 8px; padding: 0.75rem;
+        background: #878681 !important; border-radius: 8px; padding: 0.75rem;
     }
     [data-testid="stMetric"] label { color: rgba(255,255,255,0.7) !important; }
-    [data-testid="stMetric"] [data-testid="stMetricValue"] { color: #F1C969 !important; }
+    [data-testid="stMetric"] [data-testid="stMetricValue"] { color: #EABF14 !important; }
 
     /* --- Alert boxes on dark bg --- */
     .stAlert { border-radius: 8px; }
@@ -342,38 +358,48 @@ with tab1:
         predict_btn = st.button("Predict", use_container_width=True)
     
     if predict_btn and smiles_input:
-        with st.spinner("Processing..."):
-            try:
-                pred, valid_smiles = predict_smiles([smiles_input], checkpoint_path)
-                
-                if pred and len(pred) > 0:
-                    pred_value = float(pred[0][0])
-                    is_active = pred_value > 0.5
-                    
-                    status_label = "LIKELY ACTIVE" if is_active else "LIKELY INACTIVE"
-                    status_color = "#4CAF50" if is_active else "#FF9800"
-                    card_class = "active" if is_active else "inactive"
-                    st.markdown(f"""
-                    <div class="result-card {card_class}">
-                        <div class="result-card-header">Prediction Result</div>
-                        <div class="result-card-body">
-                            <div class="metric-label">SMILES</div>
-                            <div style="font-family: 'Roboto Mono', monospace; margin-bottom: 1.5rem; color: #ffffff; font-size: 0.95rem;">{smiles_input}</div>
-                            <div class="metric-label">Activity Score</div>
-                            <div class="metric-value">{pred_value:.2%}</div>
-                            <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.15);">
-                                <span style="display: inline-block; background: {status_color}; color: #fff; padding: 0.35rem 1rem;
-                                       border-radius: 6px; font-size: 0.95rem; font-weight: 700;">{status_label}</span>
-                                <span style="margin-left: 0.75rem; font-size: 0.9rem; color: rgba(255,255,255,0.6);">Probability: {pred_value:.1%}</span>
+        sanitized = sanitization.sanitize_smiles(smiles_input)
+        if sanitized is None:
+            st.error(f"Sanitization failed for: `{smiles_input}`. Please check the SMILES string.")
+        else:
+            if sanitized != smiles_input:
+                st.info(f"Sanitized: `{smiles_input}` → `{sanitized}`")
+            else:
+                st.info(f"SMILES already canonical: `{sanitized}`")
+            with st.spinner("Processing..."):
+                try:
+                    pred, valid_smiles = predict_smiles([sanitized], checkpoint_path)
+
+                    if pred and len(pred) > 0:
+                        pred_value = float(pred[0][0])
+                        is_active = pred_value > 0.5
+
+                        status_label = "LIKELY ACTIVE" if is_active else "LIKELY INACTIVE"
+                        status_color = "#4CAF50" if is_active else "#FF9800"
+                        card_class = "active" if is_active else "inactive"
+                        st.markdown(f"""
+                        <div class="result-card {card_class}">
+                            <div class="result-card-header">Prediction Result</div>
+                            <div class="result-card-body">
+                                <div class="metric-label">Original SMILES</div>
+                                <div style="font-family: 'Roboto Mono', monospace; margin-bottom: 0.5rem; color: #000000; font-size: 0.95rem;">{smiles_input}</div>
+                                <div class="metric-label">Sanitized SMILES</div>
+                                <div style="font-family: 'Roboto Mono', monospace; margin-bottom: 1.5rem; color: #000000; font-size: 0.95rem;">{sanitized}</div>
+                                <div class="metric-label">Activity Score</div>
+                                <div class="metric-value">{pred_value:.2%}</div>
+                                <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid rgba(0,0,0,0.15);">
+                                    <span style="display: inline-block; background: {status_color}; color: #fff; padding: 0.35rem 1rem;
+                                           border-radius: 6px; font-size: 0.95rem; font-weight: 700;">{status_label}</span>
+                                    <span style="margin-left: 0.75rem; font-size: 0.9rem; color: rgba(0,0,0,0.5);">Probability: {pred_value:.1%}</span>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    """, unsafe_allow_html=True)
-            except Exception as e:
-                st.error(f"❌ {str(e)}")
-                import traceback
-                with st.expander("Debug Info"):
-                    st.code(traceback.format_exc())
+                        """, unsafe_allow_html=True)
+                except Exception as e:
+                    st.error(f"Prediction error: {str(e)}")
+                    import traceback
+                    with st.expander("Debug Info"):
+                        st.code(traceback.format_exc())
 
 with tab2:
     st.header("BATCH PREDICTION")
@@ -394,39 +420,60 @@ with tab2:
 
         if st.button("Predict All", use_container_width=True, key="batch"):
             if "smiles" not in df_input.columns:
-                st.error("❌ CSV must have 'smiles' column")
+                st.error("CSV must have 'smiles' column")
             else:
-                with st.spinner(f"Processing {len(df_input)} molecules..."):
-                    try:
-                        smiles_list = df_input["smiles"].tolist()
-                        pred, valid_smiles = predict_smiles(smiles_list, checkpoint_path)
-                        
-                        df_results = pd.DataFrame({
-                            "smiles": valid_smiles,
-                            "activity_score": [float(p[0]) for p in pred],
-                        })
-                        df_results["prediction"] = df_results["activity_score"].apply(lambda x: "ACTIVE" if x > 0.5 else "INACTIVE")
-                        
-                        st.subheader("Results")
-                        st.dataframe(df_results, use_container_width=True)
-                        
-                        csv_data = df_results.to_csv(index=False)
-                        st.download_button("⬇️ Download CSV", csv_data, "predictions.csv", "text/csv", use_container_width=True)
-                        
-                        st.subheader("Summary")
-                        col1, col2, col3, col4 = st.columns(4)
-                        active_count = (df_results["activity_score"] > 0.5).sum()
-                        with col1: st.metric("Total", len(df_results))
-                        with col2: st.metric("Active", active_count)
-                        with col3: st.metric("Inactive", len(df_results) - active_count)
-                        with col4: st.metric("Avg Score", f"{df_results['activity_score'].mean():.2%}")
-                        
-                        st.success("✓ Complete")
-                    except Exception as e:
-                        st.error(f"❌ {str(e)}")
-                        import traceback
-                        with st.expander("Debug Info"):
-                            st.code(traceback.format_exc())
+                # Sanitize all SMILES first
+                raw_smiles = df_input["smiles"].tolist()
+                sanitized_smiles = []
+                failed_indices = []
+                for i, smi in enumerate(raw_smiles):
+                    san = sanitization.sanitize_smiles(smi)
+                    if san is None:
+                        failed_indices.append(i)
+                    sanitized_smiles.append(san)
+
+                if failed_indices:
+                    failed_examples = [raw_smiles[i] for i in failed_indices[:5]]
+                    st.warning(f"Sanitization failed for {len(failed_indices)} molecule(s). They will be skipped. Examples: {', '.join(failed_examples)}")
+
+                # Filter to valid molecules
+                valid_pairs = [(raw, san) for raw, san in zip(raw_smiles, sanitized_smiles) if san is not None]
+
+                if not valid_pairs:
+                    st.error("No valid molecules after sanitization.")
+                else:
+                    raw_valid, san_valid = zip(*valid_pairs)
+                    with st.spinner(f"Processing {len(san_valid)} molecules..."):
+                        try:
+                            pred, pred_smiles = predict_smiles(list(san_valid), checkpoint_path)
+
+                            df_results = pd.DataFrame({
+                                "original_smiles": list(raw_valid),
+                                "sanitized_smiles": list(san_valid),
+                                "activity_score": [float(p[0]) for p in pred],
+                            })
+                            df_results["prediction"] = df_results["activity_score"].apply(lambda x: "ACTIVE" if x > 0.5 else "INACTIVE")
+
+                            st.subheader("Results")
+                            st.dataframe(df_results, use_container_width=True)
+
+                            csv_data = df_results.to_csv(index=False)
+                            st.download_button("Download CSV", csv_data, "predictions.csv", "text/csv", use_container_width=True)
+
+                            st.subheader("Summary")
+                            col1, col2, col3, col4 = st.columns(4)
+                            active_count = (df_results["activity_score"] > 0.5).sum()
+                            with col1: st.metric("Total", len(df_results))
+                            with col2: st.metric("Active", active_count)
+                            with col3: st.metric("Inactive", len(df_results) - active_count)
+                            with col4: st.metric("Avg Score", f"{df_results['activity_score'].mean():.2%}")
+
+                            st.success("Complete")
+                        except Exception as e:
+                            st.error(f"Prediction error: {str(e)}")
+                            import traceback
+                            with st.expander("Debug Info"):
+                                st.code(traceback.format_exc())
 
 st.divider()
 st.markdown('<div class="footer-text">MetalKANO &mdash; Knowledge-Augmented Neural Network for metal-based anticancer compounds &middot; <a href="https://mb-finder.org" target="_blank">MB-Finder</a></div>', unsafe_allow_html=True)
