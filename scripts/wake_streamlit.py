@@ -13,13 +13,16 @@ This script uses Playwright + headless Chromium to:
 from __future__ import annotations
 
 import datetime
+import re
 import sys
 
 from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
 from playwright.sync_api import sync_playwright
 
 APP_URL = "https://metalkano-predict.streamlit.app/"
-WAKE_BUTTON_RE = "get this app back up"  # case-insensitive substring match
+# Case-insensitive regex — Playwright's name= accepts str or compiled Pattern,
+# NOT a lambda. Matches the Streamlit Community Cloud wake prompt.
+WAKE_TEXT_RE = re.compile(r"get this app back up", re.IGNORECASE)
 
 
 def log(msg: str) -> None:
@@ -46,10 +49,21 @@ def main() -> int:
         page.wait_for_timeout(3_000)
 
         try:
-            wake_button = page.get_by_role("button", name=lambda n: n and WAKE_BUTTON_RE in n.lower())
-            if wake_button.count() > 0 and wake_button.first.is_visible():
+            # Try button role first, then any element containing the text —
+            # Streamlit Cloud has rendered this control as both <button> and <a>.
+            candidates = [
+                page.get_by_role("button", name=WAKE_TEXT_RE),
+                page.get_by_text(WAKE_TEXT_RE),
+            ]
+            wake_button = None
+            for loc in candidates:
+                if loc.count() > 0 and loc.first.is_visible():
+                    wake_button = loc.first
+                    break
+
+            if wake_button is not None:
                 log("sleep splash detected — clicking wake button")
-                wake_button.first.click()
+                wake_button.click()
                 # Wait for the app to finish booting. This can take a while.
                 try:
                     page.wait_for_load_state("networkidle", timeout=180_000)
