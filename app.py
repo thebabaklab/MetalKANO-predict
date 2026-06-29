@@ -262,7 +262,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-st.markdown('<div class="header-container"><h1>MetalKANO</h1><p>Metal-based anticancer compound activity prediction</p></div>', unsafe_allow_html=True)
+st.markdown('<div class="header-container"><h1>Predict Activity</h1><p>Metal-based anticancer compound activity prediction</p></div>', unsafe_allow_html=True)
 
 # ============================================================================
 # CELL LINE SELECTOR (inline, below header)
